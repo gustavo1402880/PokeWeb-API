@@ -10,13 +10,13 @@ import java.util.UUID;
  * <p>Represents the act of attacking between
  * an attacker and a defender in a Pokémon battle</p>
  *
- * @param attackerId
- * @param attackerNickname
- * @param defenderId
- * @param defenderNickname
- * @param damage
- * @param defenderRemainingHealth
- * @param defenderFainted
+ * @param attackerId Pokémon attacker id
+ * @param attackerNickname Pokémon attacker nickname
+ * @param defenderId Pokémon defender id
+ * @param defenderNickname Pokémon defender nickname
+ * @param damage Amount of damage the defender sustained
+ * @param defenderRemainingHealth Amount of health the defender remaining
+ * @param defenderFainted Boolean indicator the defender fainted
  */
 @Tag(
         name = "Attack result record",

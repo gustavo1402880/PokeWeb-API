@@ -10,10 +10,10 @@ import java.util.List;
  * <p>Represents the result of a
  * Pokémon battle, including the battle history</p>
  *
- * @param winner
- * @param loser
- * @param turns
- * @param battleHistory
+ * @param winner Battle winner ID
+ * @param loser Battle loser ID
+ * @param turns Amount of turn the battle lasted
+ * @param battleHistory List of BattleTurn representing battle history
  */
 @Tag(
         name = "Battle result record",

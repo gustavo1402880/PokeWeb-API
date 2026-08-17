@@ -8,12 +8,12 @@ import io.swagger.v3.oas.annotations.tags.Tag;
  * <p>Represents a turn in a Pokémon
  * battle between an attacker and a defender</p>
  *
- * @param turn
- * @param attacker
- * @param defender
- * @param damage
- * @param defenderRemainingHealth
- * @param defenderFainted
+ * @param turn Battle turn index
+ * @param attacker Battle turn attacker ID
+ * @param defender Battle turn defender ID
+ * @param damage Amount of damage the defender sustained
+ * @param defenderRemainingHealth Amount of health the defender remaining
+ * @param defenderFainted Boolean indicator the defender fainted
  */
 @Tag(
         name = "Battle turn record",
