@@ -71,28 +71,68 @@ public class Pokemon {
         this.battlePosition = battlePosition;
     }
 
+    /**
+     * Checks if the Pokémon has fainted.
+     *
+     * @return Boolean value if the Pokémon has fainted
+     */
     public boolean isFainted() {
         return this.currentHealth == 0;
     }
 
+    /**
+     * Process the damage taken by the Pokémon.
+     *
+     * <p>Calculates the damage taken by the Pokémon,
+     * if currentHealth drops below zero, currentHealth will
+     * be reset automatically.</p>
+     *
+     * @param damage Amount of damage the Pokémon received
+     */
     public void takeDamage(int damage) {
         this.currentHealth = Math.max(0, currentHealth - Math.max(0, damage));
     }
 
+    /**
+     * Process the healed taken by the Pokémon
+     *
+     * <p>Calculates the health taken by the Pokémon,
+     * if currentHealth exceeds the maxHealth, currentHealth
+     * will automatically match maximum health.</p>
+     *
+     * @param amount Amount of heal the Pokémon received
+     */
     public void heal(int amount) {
         this.currentHealth = Math.min(maxHealth, currentHealth + Math.max(0, amount));
     }
 
+    /**
+     * Checks the Pokémon can attack
+     *
+     * @return Boolean if the Pokémon is battling
+     */
     public boolean canAttack() {
         return this.battlePosition == BattlePosition.FRONT;
     }
 
+    /**
+     * Change the Pokémon position
+     *
+     * <p>Change the battlePosition of a Pokémon
+     * based on his current position</p>
+     */
     public void movePosition() {
         this.battlePosition = this.battlePosition == BattlePosition.FRONT
                 ? BattlePosition.BACK
                 : BattlePosition.FRONT;
     }
 
+    /**
+     * Increases the Pokémon's level
+     *
+     * <p>Increases the Pokémon's level improving its
+     * battle attributes</p>
+     */
     public void levelUp() {
         this.level += 1;
         this.attack += 2;
