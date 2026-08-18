@@ -10,9 +10,9 @@ import java.util.UUID;
  * <p>Represents the act of attacking between
  * an attacker and a defender in a Pokémon battle</p>
  *
- * @param attackerId Pokémon attacker id
+ * @param attackerId Pokémon attacker ID
  * @param attackerNickname Pokémon attacker nickname
- * @param defenderId Pokémon defender id
+ * @param defenderId Pokémon defender ID
  * @param defenderNickname Pokémon defender nickname
  * @param damage Amount of damage the defender sustained
  * @param defenderRemainingHealth Amount of health the defender remaining

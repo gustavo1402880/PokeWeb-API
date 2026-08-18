@@ -30,20 +30,20 @@ public class Gym {
     private PokemonType type;
     private GymLeader leader;
     private Trainer challenger;
-    private List<Pokemon> pokemons;
+    private List<Pokemon> pokemon;
 
     public Gym() {}
 
     public Gym(String name,
                GymLeader leader,
                Trainer challenger,
-               List<Pokemon> pokemons
+               List<Pokemon> pokemon
     ) {
         this.name = name;
         this.type = leader.getSpeciality();
         this.leader = leader;
         this.challenger = challenger;
-        this.pokemons = new ArrayList<>(pokemons);
+        this.pokemon = new ArrayList<>(pokemon);
     }
 
     public String getName() {
@@ -78,11 +78,11 @@ public class Gym {
         this.challenger = challenger;
     }
 
-    public List<Pokemon> getPokemons() {
-        return pokemons;
+    public List<Pokemon> getPokemon() {
+        return pokemon;
     }
 
-    public void setPokemons(List<Pokemon> pokemons) {
-        this.pokemons = pokemons;
+    public void setPokemon(List<Pokemon> pokemon) {
+        this.pokemon = pokemon;
     }
 }
