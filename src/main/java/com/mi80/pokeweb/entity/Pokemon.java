@@ -41,6 +41,23 @@ public class Pokemon {
 
     public Pokemon() {}
 
+    /**
+     *
+     * @param numberDex
+     * @param name
+     * @param nickname
+     * @param primaryType
+     * @param secondaryType
+     * @param maxHealth
+     * @param currentHealth
+     * @param attack
+     * @param defense
+     * @param speed
+     * @param classification
+     * @param level
+     * @param evolutionStage
+     * @param battlePosition
+     */
     public Pokemon(int numberDex,
                    String name,
                    String nickname,
@@ -55,6 +72,7 @@ public class Pokemon {
                    EvolutionStage evolutionStage,
                    BattlePosition battlePosition
     ) {
+        this.id = UUID.randomUUID();
         this.numberDex = numberDex;
         this.name = name;
         this.nickname = nickname;
@@ -90,7 +108,7 @@ public class Pokemon {
      * @param damage Amount of damage the Pokémon received
      */
     public void takeDamage(int damage) {
-        this.currentHealth = Math.max(0, currentHealth - Math.max(0, damage));
+        this.currentHealth = Math.max(0, this.currentHealth - Math.max(0, damage));
     }
 
     /**
@@ -103,7 +121,17 @@ public class Pokemon {
      * @param amount Amount of heal the Pokémon received
      */
     public void heal(int amount) {
-        this.currentHealth = Math.min(maxHealth, currentHealth + Math.max(0, amount));
+        this.currentHealth = Math.min(this.maxHealth, this.currentHealth + Math.max(0, amount));
+    }
+
+    /**
+     * Process full heal teken by the Pokémon
+     *
+     * <p>Sets the Pokémon's currenthealth to
+     * it's maxHealth</p>
+     */
+    public void fullHeal() {
+        this.currentHealth = this.maxHealth;
     }
 
     /**
