@@ -34,16 +34,33 @@ public class Gym {
 
     public Gym() {}
 
+    /**
+     *
+     *
+     * @param name
+     * @param leader
+     * @param challenger
+     * @param pokemon
+     */
     public Gym(String name,
                GymLeader leader,
                Trainer challenger,
                List<Pokemon> pokemon
     ) {
+        this.id = UUID.randomUUID();
         this.name = name;
         this.type = leader.getSpeciality();
         this.leader = leader;
         this.challenger = challenger;
         this.pokemon = new ArrayList<>(pokemon);
+    }
+
+    public UUID getId() {
+        return id;
+    }
+
+    public void setId(UUID id) {
+        this.id = id;
     }
 
     public String getName() {

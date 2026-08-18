@@ -29,7 +29,15 @@ public class PokemonService {
         return pokedex.stream()
                 .filter(pokemon -> pokemon.getId().equals(id))
                 .findFirst()
-                .orElseThrow(() -> new RuntimeException("Pokémon not found"));
+                .orElseThrow(() -> new RuntimeException("Pokémon was not found"));
+    }
+
+    public Pokemon findByDex(int dex) {
+        return pokedex.stream()
+                .filter(pokemon ->
+                        pokemon.getNumberDex() == dex)
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Pokémon was not found"));
     }
 
     public AttackResult attack(
@@ -160,7 +168,7 @@ public class PokemonService {
     private static void seedPokemons() {
         pokedex.add(
                 new Pokemon(
-                        0025, "Pikachu", null,
+                        25, "Pikachu", null,
                         PokemonType.ELECTRIC, null,
                         49, 49, 27, 31, 40,
                         "Mouse Pokémon", 15,
@@ -169,7 +177,7 @@ public class PokemonService {
         );
         pokedex.add(
                 new Pokemon(
-                        0133, "Eevee", null,
+                        133, "Eevee", null,
                         PokemonType.NORMAL, null,
                         43, 43, 19, 20, 21,
                         "Evolution Pokémon", 14,
@@ -178,11 +186,155 @@ public class PokemonService {
         );
         pokedex.add(
                 new Pokemon(
-                        0123, "Scyther", null,
+                        123, "Scyther", null,
                         PokemonType.BUG, PokemonType.FLYING,
                         74, 74, 64, 48, 61,
                         "Mantis Pokémon", 27,
                         EvolutionStage.BASIC, BattlePosition.FRONT
+                )
+        );
+        pokedex.add(
+                new Pokemon(
+                        74, "Geodude", null,
+                        PokemonType.ROCK, PokemonType.GROUND,
+                        45, 60, 20, 15, 30,
+                        "Rock Head Pokémon", 12,
+                        EvolutionStage.BASIC, BattlePosition.FRONT
+                )
+        );
+        pokedex.add(
+                new Pokemon(
+                        95, "Onix", null,
+                        PokemonType.ROCK, PokemonType.GROUND,
+                        45, 90, 25, 40, 45,
+                        "Rock Snake Pokémon", 14,
+                        EvolutionStage.BASIC, BattlePosition.FRONT
+                )
+        );
+        pokedex.add(
+                new Pokemon(
+                        120, "Staryu", null,
+                        PokemonType.WATER, null,
+                        30, 45, 50, 60, 35,
+                        "Star Shape Pokémon", 18,
+                        EvolutionStage.BASIC, BattlePosition.FRONT
+                )
+        );
+        pokedex.add(
+                new Pokemon(
+                        121, "Starmie", null,
+                        PokemonType.WATER, PokemonType.PSYCHIC,
+                        55, 75, 85, 95, 50,
+                        "Mysterious Pokémon", 21,
+                        EvolutionStage.STAGE_1, BattlePosition.FRONT
+                )
+        );
+        pokedex.add(
+                new Pokemon(
+                        100, "Voltorb", null,
+                        PokemonType.ELECTRIC, null,
+                        30, 30, 45, 80, 30,
+                        "Ball Pokémon", 21,
+                        EvolutionStage.BASIC, BattlePosition.FRONT
+                )
+        );
+        pokedex.add(
+                new Pokemon(
+                        26, "Raichu", null,
+                        PokemonType.ELECTRIC, null,
+                        70, 55, 70, 90, 55,
+                        "Mouse Pokémon", 24,
+                        EvolutionStage.STAGE_1, BattlePosition.FRONT
+                )
+        );
+        pokedex.add(
+                new Pokemon(
+                        114, "Tangela", null,
+                        PokemonType.GRASS, null,
+                        45, 85, 70, 50, 45,
+                        "Vine Pokémon", 29,
+                        EvolutionStage.BASIC, BattlePosition.FRONT
+                )
+        );
+        pokedex.add(
+                new Pokemon(
+                        45, "Vileplume", null,
+                        PokemonType.GRASS, PokemonType.POISON,
+                        65, 75, 85, 40, 60,
+                        "Flower Pokémon", 29,
+                        EvolutionStage.STAGE_2, BattlePosition.FRONT
+                )
+        );
+        pokedex.add(
+                new Pokemon(
+                        109, "Koffing", null,
+                        PokemonType.POISON, null,
+                        45, 75, 45, 25, 35,
+                        "Poison Gas Pokémon", 37,
+                        EvolutionStage.BASIC, BattlePosition.FRONT
+                )
+        );
+        pokedex.add(
+                new Pokemon(
+                        89, "Muk", null,
+                        PokemonType.POISON, null,
+                        80, 50, 55, 35, 70,
+                        "Sludge Pokémon", 39,
+                        EvolutionStage.STAGE_1, BattlePosition.FRONT
+                )
+        );
+        pokedex.add(
+                new Pokemon(
+                        64, "Kadabra", null,
+                        PokemonType.PSYCHIC, null,
+                        35, 25, 85, 75, 40,
+                        "Psi Pokémon", 38,
+                        EvolutionStage.STAGE_1, BattlePosition.FRONT
+                )
+        );
+        pokedex.add(
+                new Pokemon(
+                        65, "Alakazam", null,
+                        PokemonType.PSYCHIC, null,
+                        50, 40, 105, 95, 50,
+                        "Psi Pokémon", 43,
+                        EvolutionStage.STAGE_2, BattlePosition.FRONT
+                )
+        );
+        pokedex.add(
+                new Pokemon(
+                        58, "Growlithe", null,
+                        PokemonType.FIRE, null,
+                        65, 45, 50, 55, 50,
+                        "Puppy Pokémon", 42,
+                        EvolutionStage.BASIC, BattlePosition.FRONT
+                )
+        );
+        pokedex.add(
+                new Pokemon(
+                        59, "Arcanine", null,
+                        PokemonType.FIRE, null,
+                        95, 70, 80, 85, 80,
+                        "Legendary Pokémon", 47,
+                        EvolutionStage.STAGE_1, BattlePosition.FRONT
+                )
+        );
+        pokedex.add(
+                new Pokemon(
+                        111, "Rhyhorn", null,
+                        PokemonType.GROUND, PokemonType.ROCK,
+                        70, 65, 25, 25, 60,
+                        "Spikes Pokémon", 45,
+                        EvolutionStage.BASIC, BattlePosition.FRONT
+                )
+        );
+        pokedex.add(
+                new Pokemon(
+                        34, "Nidoking", null,
+                        PokemonType.POISON, PokemonType.GROUND,
+                        81, 65, 75, 75, 70,
+                        "Drill Pokémon", 50,
+                        EvolutionStage.STAGE_2, BattlePosition.FRONT
                 )
         );
     }
