@@ -94,7 +94,7 @@ public class GymService {
     }
 
     public Gym findByGymOrder(int order) {
-        if (order < 0 || order > 7) {
+        if (order < 1 || order > 8) {
             throw new RuntimeException("Gym was not found");
         }
 

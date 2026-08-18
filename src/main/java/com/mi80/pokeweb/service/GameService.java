@@ -294,6 +294,13 @@ public class GameService {
             } else {
                 throw new RuntimeException("The battle has reached the maximum turn limit");
             }
+
+            battleResults.add( new BattleResult(
+                    winner.getName(),
+                    loser.getName(),
+                    turns,
+                    List.copyOf(battleHistory)
+            ));
         }
 
         return battleResults;

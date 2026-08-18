@@ -36,6 +36,7 @@ public class Game {
     public Game() {}
 
     public Game(Trainer trainer, Gym currentGym, int coins) {
+        this.id = UUID.randomUUID();
         this.trainer = trainer;
         this.currentGym = currentGym;
         this.coins = coins;

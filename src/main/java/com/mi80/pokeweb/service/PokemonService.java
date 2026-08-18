@@ -57,6 +57,8 @@ public class PokemonService {
 
         int damage = calculateDamage(attacker, defender);
 
+        defender.takeDamage(damage);
+
         return new AttackResult(
                 attacker.getId(),
                 attacker.getNickname(),
