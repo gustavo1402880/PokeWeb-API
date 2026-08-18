@@ -17,72 +17,64 @@ public class GymService {
 
     public GymService(PokemonService pokemonService) {
         gyms.add(createGym(
-                "Pewter Gym",
-                GymLeader.BROCK,Trainer.ASH,
+                "Pewter Gym", 1,
+                GymLeader.BROCK,null,
                 List.of(
                         pokemonService.findByDex(74),
                         pokemonService.findByDex(95)
                 )
         ));
         gyms.add(createGym(
-                "Cerulean Gym",
-                GymLeader.MISTY,Trainer.ASH,
+                "Cerulean Gym", 2,
+                GymLeader.MISTY,null,
                 List.of(
                         pokemonService.findByDex(120),
                         pokemonService.findByDex(121)
                 )
         ));
         gyms.add(createGym(
-                "Vermilion Gym",
-                GymLeader.LT_SURGE,Trainer.ASH,
+                "Vermilion Gym", 3,
+                GymLeader.LT_SURGE,null,
                 List.of(
                         pokemonService.findByDex(100),
                         pokemonService.findByDex(26)
                 )
         ));
         gyms.add(createGym(
-                "Celadon Gym",
-                GymLeader.ERIKA,Trainer.ASH,
+                "Celadon Gym", 4,
+                GymLeader.ERIKA,null,
                 List.of(
                         pokemonService.findByDex(114),
                         pokemonService.findByDex(45)
                 )
         ));
         gyms.add(createGym(
-                "Fuchsia Gym",
-                GymLeader.KOGA,Trainer.ASH,
+                "Fuchsia Gym", 5,
+                GymLeader.KOGA,null,
                 List.of(
                         pokemonService.findByDex(109),
                         pokemonService.findByDex(89)
                 )
         ));
         gyms.add(createGym(
-                "Cerulean Gym",
-                GymLeader.MISTY,Trainer.ASH,
-                List.of(
-                        pokemonService.findByDex(120),
-                        pokemonService.findByDex(121)
-                )
-        ));
-        gyms.add(createGym(
-                "Saffron Gym",
-                GymLeader.SABRINA,Trainer.ASH,
+                "Saffron Gym", 6,
+                GymLeader.SABRINA,null,
                 List.of(
                         pokemonService.findByDex(64),
                         pokemonService.findByDex(65)
                 )
         ));
         gyms.add(createGym(
-                "Cinnabar Gym",
-                GymLeader.BLAINE,Trainer.ASH,
+                "Cinnabar Gym", 7,
+                GymLeader.BLAINE,null,
                 List.of(
                         pokemonService.findByDex(58),
                         pokemonService.findByDex(59)
                 )
         ));
         gyms.add(createGym(
-                "Viridian Gym",
-                GymLeader.GIOVANNI,Trainer.ASH,
+                "Viridian Gym", 8,
+                GymLeader.GIOVANNI,null,
                 List.of(
                         pokemonService.findByDex(111),
                         pokemonService.findByDex(34)
@@ -101,18 +93,31 @@ public class GymService {
                 .orElseThrow(() -> new RuntimeException("Gym was not found"));
     }
 
+    public Gym findByGymOrder(int order) {
+        if (order < 0 || order > 7) {
+            throw new RuntimeException("Gym was not found");
+        }
+
+        return gyms.stream()
+                .filter(gym -> gym.getGymOrder() == order)
+                .findFirst()
+                .orElseThrow(() -> new RuntimeException("Gym was not found"));
+    }
+
     public List<Pokemon> findPokemon(UUID id) {
         return List.copyOf(findById(id).getPokemon());
     }
 
     private static Gym createGym(
             String name,
+            int gymOrder,
             GymLeader leader,
             Trainer challenger,
             List<Pokemon> pokemon
     ) {
         return new Gym(
                 name,
+                gymOrder,
                 leader,
                 challenger,
                 pokemon

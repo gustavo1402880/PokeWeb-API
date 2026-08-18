@@ -8,6 +8,7 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 /**
  * Game entity
@@ -34,11 +35,11 @@ public class Game {
 
     public Game() {}
 
-    public Game(Trainer trainer, Gym currentGym, int coins, List<Pokemon> team, Map<ItemType, Integer> inventory) {
+    public Game(Trainer trainer, Gym currentGym, int coins) {
         this.trainer = trainer;
         this.currentGym = currentGym;
         this.coins = coins;
-        this.team = team;
+        this.team = new CopyOnWriteArrayList<>();
         this.inventory = new EnumMap<>(ItemType.class);
 
         for (ItemType item : ItemType.values()) {

@@ -96,10 +96,10 @@ public class PokemonService {
             throw  new RuntimeException("A Fainted Pokémon cannot flee");
         }
 
-        double dodgeChance = ((double) pokemon.getSpeed()
-                / pokemon.getSpeed() + opponent.getSpeed()) * 0.2;
+        double fleeChance = ((double) (pokemon.getSpeed() + pokemon.getLevel())
+                / (pokemon.getSpeed() + pokemon.getLevel()) + (opponent.getSpeed() + opponent.getLevel()) * 0.2);
 
-        return Math.random() < dodgeChance;
+        return Math.random() < fleeChance;
     }
 
     public Pokemon levelUp(
@@ -168,6 +168,33 @@ public class PokemonService {
     private static void seedPokemons() {
         pokedex.add(
                 new Pokemon(
+                        1, "Bulbasaur", null,
+                        PokemonType.GRASS, PokemonType.POISON,
+                        45, 45, 49, 49, 45,
+                        "Seed Pokémon", 15,
+                        EvolutionStage.BASIC, BattlePosition.FRONT
+                )
+        );
+        pokedex.add(
+                new Pokemon(
+                        7, "Squirtle", null,
+                        PokemonType.WATER, null,
+                        44, 44, 48, 65, 43,
+                        "Tiny Turtle Pokémon", 15,
+                        EvolutionStage.BASIC, BattlePosition.FRONT
+                )
+        );
+        pokedex.add(
+                new Pokemon(
+                        4, "Charmander", null,
+                        PokemonType.FIRE, null,
+                        39, 39, 52, 43, 65,
+                        "Lizard Pokémon", 15,
+                        EvolutionStage.BASIC, BattlePosition.FRONT
+                )
+        );
+        pokedex.add(
+                new Pokemon(
                         25, "Pikachu", null,
                         PokemonType.ELECTRIC, null,
                         49, 49, 27, 31, 40,
@@ -181,15 +208,6 @@ public class PokemonService {
                         PokemonType.NORMAL, null,
                         43, 43, 19, 20, 21,
                         "Evolution Pokémon", 14,
-                        EvolutionStage.BASIC, BattlePosition.FRONT
-                )
-        );
-        pokedex.add(
-                new Pokemon(
-                        123, "Scyther", null,
-                        PokemonType.BUG, PokemonType.FLYING,
-                        74, 74, 64, 48, 61,
-                        "Mantis Pokémon", 27,
                         EvolutionStage.BASIC, BattlePosition.FRONT
                 )
         );

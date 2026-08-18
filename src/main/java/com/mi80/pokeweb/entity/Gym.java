@@ -26,6 +26,7 @@ import java.util.UUID;
 )
 public class Gym {
     private UUID id;
+    private int gymOrder;
     private String name;
     private PokemonType type;
     private GymLeader leader;
@@ -39,15 +40,18 @@ public class Gym {
      *
      * @param name
      * @param leader
+     * @param gymOrder
      * @param challenger
      * @param pokemon
      */
     public Gym(String name,
+               int gymOrder,
                GymLeader leader,
                Trainer challenger,
                List<Pokemon> pokemon
     ) {
         this.id = UUID.randomUUID();
+        this.gymOrder = gymOrder;
         this.name = name;
         this.type = leader.getSpeciality();
         this.leader = leader;
@@ -61,6 +65,14 @@ public class Gym {
 
     public void setId(UUID id) {
         this.id = id;
+    }
+
+    public int getGymOrder() {
+        return gymOrder;
+    }
+
+    public void setGymOrder(int gymOrder) {
+        this.gymOrder = gymOrder;
     }
 
     public String getName() {
