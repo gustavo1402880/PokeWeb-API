@@ -91,10 +91,12 @@ public class GameService {
         return game;
     }
 
-    public Game capturePokemon(UUID id, UUID firstPokemonId, UUID wildPokemonId) {
+    public Game capturePokemon(UUID id, UUID wildPokemonId) {
         Game game = findGameById(id);
 
+        Pokemon trainerPokemon = getNextAvailablePokemon(game.getTeam());
         Pokemon pokemon = pokemonService.findById(wildPokemonId);
+
 
         if (game.getTeam().size() >= MAX_TEAM_SIZE) {
             throw new RuntimeException("Team already has the maximum number of Pokémon");
@@ -102,7 +104,7 @@ public class GameService {
 
         boolean hasFled = pokemonService.flee(
                 wildPokemonId,
-                firstPokemonId
+                trainerPokemon.getId()
         );
 
         if (hasFled) {
@@ -148,13 +150,20 @@ public class GameService {
         return healedPokemon;
     }
 
-    public BattleResult startBattle(UUID teamPokemonId, UUID opponentPokemonId) {
-        if (teamPokemonId.equals(opponentPokemonId)) {
+    public Pokemon heal(UUID id, UUID pokemonId) {
+        Game game = findGameById(id);
+
+        requirePokemonInTeam(game, pokemonId);
+        return pokemonService.fullHeal(pokemonId);
+    }
+
+    public BattleResult startBattle(UUID firstPokemonId, UUID secondPokemonId) {
+        if (firstPokemonId.equals(secondPokemonId)) {
             throw new RuntimeException("A battle requires two different Pokémon");
         }
 
-        Pokemon firstPokemon = pokemonService.findById(teamPokemonId);
-        Pokemon secondPokemon = pokemonService.findById(opponentPokemonId);
+        Pokemon firstPokemon = pokemonService.findById(firstPokemonId);
+        Pokemon secondPokemon = pokemonService.findById(secondPokemonId);
 
         if (firstPokemon.isFainted() || secondPokemon.isFainted()) {
             throw new RuntimeException("A fainted Pokémon cannot start a battle");
@@ -224,7 +233,7 @@ public class GameService {
         );
     }
 
-    private List<BattleResult> challengeGymLeader(UUID id) {
+    public List<BattleResult> challengeGymLeader(UUID id) {
         Game game = findGameById(id);
         List<BattleResult> battleResults = new ArrayList<>();
 
