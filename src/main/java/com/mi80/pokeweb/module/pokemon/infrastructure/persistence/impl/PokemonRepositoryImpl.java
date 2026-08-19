@@ -31,8 +31,8 @@ public class PokemonRepositoryImpl implements PokemonRepository {
     }
 
     @Override
-    public void save(Pokemon pokemon) {
-        jpaPokemonRepository.save(pokemon);
+    public Pokemon save(Pokemon pokemon) {
+        return jpaPokemonRepository.save(pokemon);
     }
 
     @Override

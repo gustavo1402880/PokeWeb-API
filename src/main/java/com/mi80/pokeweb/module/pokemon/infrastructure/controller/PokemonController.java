@@ -1,6 +1,10 @@
 package com.mi80.pokeweb.module.pokemon.infrastructure.controller;
 
 import com.mi80.pokeweb.module.game.application.service.result.AttackResult;
+import com.mi80.pokeweb.module.pokemon.application.exception.BelowRequiredLevelException;
+import com.mi80.pokeweb.module.pokemon.application.exception.FaintedPokemonException;
+import com.mi80.pokeweb.module.pokemon.application.exception.PokemonNotFoundException;
+import com.mi80.pokeweb.module.pokemon.application.exception.SamePokemonException;
 import com.mi80.pokeweb.module.pokemon.core.entity.Pokemon;
 import com.mi80.pokeweb.module.pokemon.application.service.PokemonService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -119,7 +123,7 @@ public class PokemonController {
             return ResponseEntity.ok().body(
                     service.findById(id)
             );
-        } catch (RuntimeException e) {
+        } catch (PokemonNotFoundException e) {
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
                     .build();
@@ -150,8 +154,14 @@ public class PokemonController {
                     description = "Successful attack"
             ),
             @ApiResponse(
-                    responseCode = "400",
-                    description = "Attack was not carried out"
+                    responseCode = "404",
+                    description = "Pokémon was not found"
+            ),
+            @ApiResponse(
+                    responseCode = "422",
+                    description = """
+                            Pokémon's status prevents it from attacking
+                            """
             )
     })
     @PostMapping("/{attackerId}/attack/{defenderId}")
@@ -175,9 +185,13 @@ public class PokemonController {
             return ResponseEntity.ok().body(
                     service.attack(attackerId, defenderId)
             );
-        } catch (RuntimeException e) {
+        } catch (SamePokemonException | FaintedPokemonException e) {
             return ResponseEntity
-                    .status(HttpStatus.BAD_REQUEST)
+                    .status(HttpStatus.UNPROCESSABLE_CONTENT)
+                    .build();
+        } catch (PokemonNotFoundException e) {
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
                     .build();
         }
     }
@@ -206,7 +220,11 @@ public class PokemonController {
             ),
             @ApiResponse(
                     responseCode = "404",
-                    description = "Dodge was not performed"
+                    description = "Pokemon was not found"
+            ),
+            @ApiResponse(
+                    responseCode = "422",
+                    description = "Pokemon is fainted"
             )
     })
     @GetMapping("/{defenderId}/dodge/{attackerId}")
@@ -235,9 +253,13 @@ public class PokemonController {
                             )
                     )
             );
-        } catch (RuntimeException e) {
+        } catch (PokemonNotFoundException e) {
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
+                    .build();
+        } catch (FaintedPokemonException e) {
+            return ResponseEntity
+                    .status(HttpStatus.UNPROCESSABLE_CONTENT)
                     .build();
         }
     }
@@ -266,7 +288,11 @@ public class PokemonController {
             ),
             @ApiResponse(
                     responseCode = "404",
-                    description = "Flee was not performed"
+                    description = "Pokemon was not found"
+            ),
+            @ApiResponse(
+                    responseCode = "422",
+                    description = "Pokemon is fainted"
             )
     })
     @GetMapping("/{pokemonId}/flee/{opponentId}")
@@ -295,9 +321,13 @@ public class PokemonController {
                             )
                     )
             );
-        } catch (RuntimeException e) {
+        } catch (PokemonNotFoundException e) {
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
+                    .build();
+        } catch (FaintedPokemonException e) {
+            return ResponseEntity
+                    .status(HttpStatus.UNPROCESSABLE_CONTENT)
                     .build();
         }
     }
@@ -313,20 +343,20 @@ public class PokemonController {
      * and the HTTP 200 (OK) status
      */
     @Operation(
-            summary = "Flee the battle",
+            summary = "Level up Pokemon",
             description = """
-                    Process the Pokémon's ability
-                    to flee the battle
+                    Increases the Pokémon's level,
+                    raising its stats
                     """
     )
     @ApiResponses({
             @ApiResponse(
                     responseCode = "200",
-                    description = "Successful flee"
+                    description = "Pokemon level up"
             ),
             @ApiResponse(
                     responseCode = "404",
-                    description = "Flee was not performed"
+                    description = "Pokemon was not found"
             )
     })
     @PatchMapping("/{pokemonId}/level-up")
@@ -343,13 +373,44 @@ public class PokemonController {
             return ResponseEntity.ok().body(
                     service.levelUp(pokemonId)
             );
-        } catch (RuntimeException e) {
+        } catch (PokemonNotFoundException e) {
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
                     .build();
         }
     }
 
+    /**
+     * Evolve Pokémon
+     *
+     * <p>Evolve Pokémon,
+     * change it form</p>
+     *
+     * @param pokemonId Pokémon ID
+     * @return A {@link ResponseEntity} containing an object of {@link Pokemon}
+     * and the HTTP 200 (OK) status
+     */
+    @Operation(
+            summary = "Level up Pokemon",
+            description = """
+                    Increases the Pokémon's level,
+                    raising its stats
+                    """
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Pokemon level up"
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Pokemon was not found"
+            ),
+            @ApiResponse(
+                    responseCode = "422",
+                    description = "Pokémon cannot evolve yet"
+            )
+    })
     @PutMapping("/{pokemonId}/evolve")
     public ResponseEntity<Pokemon> evolve(
             @Parameter(
@@ -373,13 +434,44 @@ public class PokemonController {
                             pokemonEvolved
                     )
             );
-        } catch (RuntimeException e) {
+        } catch (PokemonNotFoundException e) {
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
+                    .build();
+        } catch (BelowRequiredLevelException e) {
+            return ResponseEntity
+                    .status(HttpStatus.UNPROCESSABLE_CONTENT)
                     .build();
         }
     }
 
+    /**
+     * Move Pokémon
+     *
+     * <p>Change the position of
+     * a Pokémon</p>
+     *
+     * @param pokemonId Pokémon ID
+     * @return A {@link ResponseEntity} containing an object of {@link Pokemon}
+     * and the HTTP 200 (OK) status
+     */
+    @Operation(
+            summary = "Move Pokémon",
+            description = """
+                    Change the position of
+                    a Pokémon
+                    """
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Pokemon level up"
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Pokemon was not found"
+            )
+    })
     @PatchMapping("/{pokemonId}/move")
     public ResponseEntity<Pokemon> movePosition(
             @Parameter(
@@ -394,7 +486,7 @@ public class PokemonController {
             return ResponseEntity.ok().body(
                     service.movePosition(pokemonId)
             );
-        } catch (RuntimeException e) {
+        } catch (PokemonNotFoundException e) {
             return ResponseEntity
                     .status(HttpStatus.NOT_FOUND)
                     .build();

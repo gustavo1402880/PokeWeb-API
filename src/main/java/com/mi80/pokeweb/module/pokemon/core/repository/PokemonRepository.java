@@ -15,7 +15,7 @@ public interface PokemonRepository {
 
     Optional<Pokemon> findByNumberDex(int numberDex);
 
-    void save(Pokemon pokemon);
+    Pokemon save(Pokemon pokemon);
 
     boolean  existsById(UUID id);
 }
