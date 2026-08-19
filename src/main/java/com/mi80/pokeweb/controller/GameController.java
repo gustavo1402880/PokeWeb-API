@@ -2,13 +2,12 @@ package com.mi80.pokeweb.controller;
 
 import com.mi80.pokeweb.entity.BattleResult;
 import com.mi80.pokeweb.entity.Game;
-import com.mi80.pokeweb.entity.Gym;
 import com.mi80.pokeweb.entity.Pokemon;
 import com.mi80.pokeweb.enums.ItemType;
 import com.mi80.pokeweb.enums.Trainer;
 import com.mi80.pokeweb.service.GameService;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -37,54 +36,90 @@ public class GameController {
     public ResponseEntity<Game> create(
             @RequestParam Trainer trainer
     ) {
-        return ResponseEntity.ok().body(
-                service.createNewGame(trainer)
-        );
+        try {
+            return ResponseEntity.ok().body(
+                    service.createNewGame(trainer)
+            );
+        } catch (RuntimeException e) {
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .build();
+        }
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Game> listAll(
+    public ResponseEntity<Game> findById(
             @PathVariable UUID id
-            ) {
-        return ResponseEntity.ok().body(
-                service.findGameById(id)
-        );
+    ) {
+        try {
+            return ResponseEntity.ok().body(
+                    service.findGameById(id)
+            );
+        } catch (RuntimeException e) {
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .build();
+        }
     }
 
     @GetMapping("/{id}/team")
     public ResponseEntity<List<Pokemon>> findGameTeam(
             @PathVariable UUID id
     ) {
-        return ResponseEntity.ok().body(
-                service.findGameTeam(id)
-        );
+        try {
+            return ResponseEntity.ok().body(
+                    service.findGameTeam(id)
+            );
+        } catch (RuntimeException e) {
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .build();
+        }
     }
 
     @GetMapping("/{id}/inventory")
     public ResponseEntity<Map<ItemType, Integer>> findGameInventory(
             @PathVariable UUID id
     ) {
-        return ResponseEntity.ok().body(
-                service.findGameInventory(id)
-        );
+        try {
+            return ResponseEntity.ok().body(
+                    service.findGameInventory(id)
+            );
+        } catch (RuntimeException e) {
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .build();
+        }
     }
 
     @GetMapping("/{id}/coins")
     public ResponseEntity<Integer> findGameCoins(
             @PathVariable UUID id
     ) {
-        return ResponseEntity.ok().body(
-                service.findGameCoins(id)
-        );
+        try {
+            return ResponseEntity.ok().body(
+                    service.findGameCoins(id)
+            );
+        } catch (RuntimeException e) {
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .build();
+        }
     }
 
     @PatchMapping("/{id}/move")
     public ResponseEntity<Game> moveNextGym(
         @PathVariable UUID id
     ) {
-        return ResponseEntity.ok().body(
-                service.moveToGym(id)
-        );
+        try {
+            return ResponseEntity.ok().body(
+                    service.moveToGym(id)
+            );
+        } catch (RuntimeException e) {
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .build();
+        }
     }
 
     @PostMapping("/{id}/capture/{pokemonId}")
@@ -92,9 +127,15 @@ public class GameController {
             @PathVariable UUID id,
             @PathVariable UUID pokemonId
     ) {
-        return ResponseEntity.ok().body(
-                service.capturePokemon(id, pokemonId)
-        );
+        try {
+            return ResponseEntity.ok().body(
+                    service.capturePokemon(id, pokemonId)
+            );
+        } catch (RuntimeException e) {
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .build();
+        }
     }
 
     @PostMapping("/{id}/items")
@@ -102,9 +143,15 @@ public class GameController {
             @PathVariable UUID id,
             @RequestParam ItemType item
     ) {
-        return ResponseEntity.ok().body(
-                service.buyItem(id, item)
-        );
+        try {
+            return ResponseEntity.ok().body(
+                    service.buyItem(id, item)
+            );
+        } catch (RuntimeException e) {
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .build();
+        }
     }
 
     @PatchMapping("/{id}/teams/{pokemonId}/items")
@@ -113,13 +160,19 @@ public class GameController {
         @PathVariable UUID pokemonId,
         @RequestParam ItemType itemType
     ) {
-        return ResponseEntity.ok().body(
-                service.useItem(
-                        id,
-                        pokemonId,
-                        itemType
-                )
-        );
+        try {
+            return ResponseEntity.ok().body(
+                    service.useItem(
+                            id,
+                            pokemonId,
+                            itemType
+                    )
+            );
+        } catch (RuntimeException e) {
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .build();
+        }
     }
 
     @PatchMapping("/{id}/teams/{pokemonId}/heal")
@@ -127,9 +180,15 @@ public class GameController {
             @PathVariable UUID id,
             @PathVariable UUID pokemonId
     ) {
-        return ResponseEntity.ok().body(
-                service.heal(id, pokemonId)
-        );
+        try {
+            return ResponseEntity.ok().body(
+                    service.heal(id, pokemonId)
+            );
+        } catch (RuntimeException e) {
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .build();
+        }
     }
 
     @PostMapping("/battles/{firstPokemonId}/{secondPokemonId}")
@@ -137,20 +196,33 @@ public class GameController {
             @PathVariable UUID firstPokemonId,
             @PathVariable UUID secondPokemonId
     ) {
-        return ResponseEntity.ok().body(
-                service.startBattle(
-                        firstPokemonId,
-                        secondPokemonId
-                )
-        );
+        try {
+            return ResponseEntity.ok().body(
+                    service.startBattle(
+                            firstPokemonId,
+                            secondPokemonId
+                    )
+            );
+        } catch (RuntimeException e) {
+            return ResponseEntity
+                    .status(HttpStatus.CONFLICT)
+                    .build();
+        }
     }
 
     @PostMapping("/{id}/battles/gyms")
     public ResponseEntity<List<BattleResult>> challengeGymLeader(
             @PathVariable UUID id
     ) {
-        return ResponseEntity.ok().body(
-                service.challengeGymLeader(id)
-        );
+
+        try {
+            return ResponseEntity.ok().body(
+                    service.challengeGymLeader(id)
+            );
+        } catch (RuntimeException e) {
+            return ResponseEntity
+                    .status(HttpStatus.CONFLICT)
+                    .build();
+        }
     }
 }

@@ -4,6 +4,7 @@ import com.mi80.pokeweb.entity.Gym;
 import com.mi80.pokeweb.entity.Pokemon;
 import com.mi80.pokeweb.service.GymService;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -32,26 +33,44 @@ public class GymController {
 
     @GetMapping
     public ResponseEntity<List<Gym>> listAll() {
-        return ResponseEntity.ok().body(
-                service.listAll()
-        );
+        try {
+            return ResponseEntity.ok().body(
+                    service.listAll()
+            );
+        } catch (RuntimeException e) {
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .build();
+        }
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<Gym> findById(
             @PathVariable UUID id
     ) {
-        return ResponseEntity.ok().body(
-                service.findById(id)
-        );
+        try {
+            return ResponseEntity.ok().body(
+                    service.findById(id)
+            );
+        } catch (RuntimeException e) {
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .build();
+        }
     }
 
     @GetMapping("/{id}/pokemons")
     public ResponseEntity<List<Pokemon>> findGymPokemonTeam(
             @PathVariable UUID id
     ) {
-        return ResponseEntity.ok().body(
-                service.findPokemon(id)
-        );
+        try {
+            return ResponseEntity.ok().body(
+                    service.findPokemon(id)
+            );
+        } catch (RuntimeException e) {
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .build();
+        }
     }
 }

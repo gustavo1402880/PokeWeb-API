@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -69,7 +70,13 @@ public class PokemonController {
     })
     @GetMapping
     public ResponseEntity<List<Pokemon>> findAll() {
-        return ResponseEntity.ok(service.findAll());
+        try {
+            return ResponseEntity.ok(service.findAll());
+        } catch (RuntimeException e) {
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .build();
+        }
     }
 
     /**
@@ -108,9 +115,15 @@ public class PokemonController {
             )
             @PathVariable UUID id
     ) {
-        return ResponseEntity.ok().body(
-                service.findById(id)
-        );
+        try {
+            return ResponseEntity.ok().body(
+                    service.findById(id)
+            );
+        } catch (RuntimeException e) {
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .build();
+        }
     }
 
     /**
@@ -137,11 +150,11 @@ public class PokemonController {
                     description = "Successful attack"
             ),
             @ApiResponse(
-                    responseCode = "404",
+                    responseCode = "400",
                     description = "Attack was not carried out"
             )
     })
-    @PostMapping("{attackerId}/attack/{defenderId}")
+    @PostMapping("/{attackerId}/attack/{defenderId}")
     public ResponseEntity<AttackResult> attack(
             @Parameter(
                     name = "attackerId",
@@ -158,12 +171,45 @@ public class PokemonController {
             )
             @PathVariable UUID defenderId
     ) {
-        return ResponseEntity.ok().body(
-                service.attack(attackerId, defenderId)
-        );
+        try {
+            return ResponseEntity.ok().body(
+                    service.attack(attackerId, defenderId)
+            );
+        } catch (RuntimeException e) {
+            return ResponseEntity
+                    .status(HttpStatus.BAD_REQUEST)
+                    .build();
+        }
     }
 
-    @GetMapping("{defenderId}/dodge/{attackerId}")
+    /**
+     * Dodge from an attack
+     *
+     * <p>Process the Pokémon's ability to perform a dodge</p>
+     *
+     * @param defenderId Pokémon defender ID
+     * @param attackerId Pokémon attacker ID
+     * @return A {@link ResponseEntity} containing a map of {@link String} and {@link Boolean},
+     * and the HTTP 200 (OK) status
+     */
+    @Operation(
+            summary = "Dodge from an attack",
+            description = """
+                    Process the Pokémon's ability
+                    to perform a dodge
+                    """
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Successful dodge"
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Dodge was not performed"
+            )
+    })
+    @GetMapping("/{defenderId}/dodge/{attackerId}")
     public ResponseEntity<Map<String, Boolean>> dodge(
             @Parameter(
                     name = "defenderId",
@@ -180,17 +226,50 @@ public class PokemonController {
             )
             @PathVariable UUID attackerId
     ) {
-        return ResponseEntity.ok().body(
-                Map.of("success",
-                        service.dodge(
-                                defenderId,
-                                attackerId
-                        )
-                )
-        );
+        try {
+            return ResponseEntity.ok().body(
+                    Map.of("success",
+                            service.dodge(
+                                    defenderId,
+                                    attackerId
+                            )
+                    )
+            );
+        } catch (RuntimeException e) {
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .build();
+        }
     }
 
-    @GetMapping("{pokemonId}/flee/{opponentId}")
+    /**
+     * Flee the battle
+     *
+     * <p>Process the Pokémon's ability to flee the battle</p>
+     *
+     * @param pokemonId Pokémon ID
+     * @param opponentId Pokémon opponent ID
+     * @return A {@link ResponseEntity} containing a map of {@link String} and {@link Boolean},
+     * and the HTTP 200 (OK) status
+     */
+    @Operation(
+            summary = "Flee the battle",
+            description = """
+                    Process the Pokémon's ability
+                    to flee the battle
+                    """
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Successful flee"
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Flee was not performed"
+            )
+    })
+    @GetMapping("/{pokemonId}/flee/{opponentId}")
     public ResponseEntity<Map<String, Boolean>> flee(
             @Parameter(
                     name = "pokemonId",
@@ -207,17 +286,50 @@ public class PokemonController {
             )
             @PathVariable UUID opponentId
     ) {
-        return ResponseEntity.ok().body(
-                Map.of("success",
-                        service.flee(
-                                pokemonId,
-                                opponentId
-                        )
-                )
-        );
+        try {
+            return ResponseEntity.ok().body(
+                    Map.of("success",
+                            service.flee(
+                                    pokemonId,
+                                    opponentId
+                            )
+                    )
+            );
+        } catch (RuntimeException e) {
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .build();
+        }
     }
 
-    @PatchMapping("{pokemonId}/level-up")
+    /**
+     * Level up Pokémon
+     *
+     * <p>Increases the Pokémon's level,
+     * raising its stats</p>
+     *
+     * @param pokemonId Pokémon ID
+     * @return A {@link ResponseEntity} containing an object of {@link Pokemon}
+     * and the HTTP 200 (OK) status
+     */
+    @Operation(
+            summary = "Flee the battle",
+            description = """
+                    Process the Pokémon's ability
+                    to flee the battle
+                    """
+    )
+    @ApiResponses({
+            @ApiResponse(
+                    responseCode = "200",
+                    description = "Successful flee"
+            ),
+            @ApiResponse(
+                    responseCode = "404",
+                    description = "Flee was not performed"
+            )
+    })
+    @PatchMapping("/{pokemonId}/level-up")
     public ResponseEntity<Pokemon> levelUp(
             @Parameter(
                     name = "pokemonId",
@@ -227,12 +339,18 @@ public class PokemonController {
             )
             @PathVariable UUID pokemonId
     ) {
-        return ResponseEntity.ok().body(
-                service.levelUp(pokemonId)
-        );
+        try {
+            return ResponseEntity.ok().body(
+                    service.levelUp(pokemonId)
+            );
+        } catch (RuntimeException e) {
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .build();
+        }
     }
 
-    @PutMapping("{pokemonId}/evolve")
+    @PutMapping("/{pokemonId}/evolve")
     public ResponseEntity<Pokemon> evolve(
             @Parameter(
                     name = "pokemonId",
@@ -248,15 +366,21 @@ public class PokemonController {
             )
             @RequestBody Pokemon pokemonEvolved
     ) {
-        return ResponseEntity.ok().body(
-                service.evolve(
-                        pokemonId,
-                        pokemonEvolved
-                )
-        );
+        try {
+            return ResponseEntity.ok().body(
+                    service.evolve(
+                            pokemonId,
+                            pokemonEvolved
+                    )
+            );
+        } catch (RuntimeException e) {
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .build();
+        }
     }
 
-    @PatchMapping("{pokemonId}/move")
+    @PatchMapping("/{pokemonId}/move")
     public ResponseEntity<Pokemon> movePosition(
             @Parameter(
                     name = "pokemonId",
@@ -266,8 +390,14 @@ public class PokemonController {
             )
             @PathVariable UUID pokemonId
     ) {
-        return ResponseEntity.ok().body(
-                service.movePosition(pokemonId)
-        );
+        try {
+            return ResponseEntity.ok().body(
+                    service.movePosition(pokemonId)
+            );
+        } catch (RuntimeException e) {
+            return ResponseEntity
+                    .status(HttpStatus.NOT_FOUND)
+                    .build();
+        }
     }
 }
