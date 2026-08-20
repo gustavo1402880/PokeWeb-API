@@ -2,6 +2,7 @@ package com.mi80.pokeweb.module.gym.core.enums;
 
 import com.mi80.pokeweb.module.pokemon.core.enums.PokemonType;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.Getter;
 
 /**
  * Gym leader enum
@@ -11,6 +12,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
  * @author gustavo_pelissari150
  * @version 1.0.0
  */
+@Getter
 @Tag(
         name = "Gym leader enum",
         description = """
@@ -31,8 +33,4 @@ public enum GymLeader {
     private final PokemonType speciality;
 
     GymLeader(PokemonType speciality) {this.speciality = speciality;}
-
-    public PokemonType getSpeciality() {
-        return this.speciality;
-    }
 }

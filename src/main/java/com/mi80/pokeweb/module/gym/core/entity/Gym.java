@@ -5,8 +5,9 @@ import com.mi80.pokeweb.module.pokemon.core.enums.PokemonType;
 import com.mi80.pokeweb.module.game.core.enums.Trainer;
 import com.mi80.pokeweb.module.pokemon.core.entity.Pokemon;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.persistence.*;
+import lombok.*;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -18,6 +19,13 @@ import java.util.UUID;
  * @author gustavo_pelissari150
  * @version 1.0.0
  */
+@Entity
+@Getter
+@Setter
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
+@Table(name = "gyms")
 @Tag(
         name = "Gym entity",
         description = """
@@ -26,93 +34,33 @@ import java.util.UUID;
                 """
 )
 public class Gym {
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
+
+    @Column(name = "gym_order", nullable = false, unique = true)
     private int gymOrder;
+
+    @Column(nullable = false)
     private String name;
-    private PokemonType type;
+
+    @Column(name = "gym_leader", nullable = false)
+    @Enumerated(value = EnumType.STRING)
     private GymLeader leader;
+
+    @Column(nullable = true)
+    @Enumerated(value = EnumType.STRING)
     private Trainer challenger;
+
+    @Column(nullable = true)
+    @Enumerated(value = EnumType.STRING)
+    private PokemonType type = leader.getSpeciality();
+
+    @OneToMany(fetch = FetchType.LAZY)
+    @JoinColumn(
+            name = "gym_id",
+            nullable = false,
+            foreignKey = @ForeignKey(name = "fk_gym_pokemon")
+    )
     private List<Pokemon> pokemon;
-
-    public Gym() {}
-
-    /**
-     *
-     *
-     * @param name
-     * @param leader
-     * @param gymOrder
-     * @param challenger
-     * @param pokemon
-     */
-    public Gym(String name,
-               int gymOrder,
-               GymLeader leader,
-               Trainer challenger,
-               List<Pokemon> pokemon
-    ) {
-        this.id = UUID.randomUUID();
-        this.gymOrder = gymOrder;
-        this.name = name;
-        this.type = leader.getSpeciality();
-        this.leader = leader;
-        this.challenger = challenger;
-        this.pokemon = new ArrayList<>(pokemon);
-    }
-
-    public UUID getId() {
-        return id;
-    }
-
-    public void setId(UUID id) {
-        this.id = id;
-    }
-
-    public int getGymOrder() {
-        return gymOrder;
-    }
-
-    public void setGymOrder(int gymOrder) {
-        this.gymOrder = gymOrder;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public PokemonType getType() {
-        return type;
-    }
-
-    public void setType(PokemonType type) {
-        this.type = type;
-    }
-
-    public GymLeader getLeader() {
-        return leader;
-    }
-
-    public void setLeader(GymLeader leader) {
-        this.leader = leader;
-    }
-
-    public Trainer getChallenger() {
-        return challenger;
-    }
-
-    public void setChallenger(Trainer challenger) {
-        this.challenger = challenger;
-    }
-
-    public List<Pokemon> getPokemon() {
-        return pokemon;
-    }
-
-    public void setPokemon(List<Pokemon> pokemon) {
-        this.pokemon = pokemon;
-    }
 }

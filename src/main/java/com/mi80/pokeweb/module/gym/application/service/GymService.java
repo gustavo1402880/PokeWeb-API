@@ -1,127 +1,53 @@
 package com.mi80.pokeweb.module.gym.application.service;
 
+import com.mi80.pokeweb.module.gym.application.exception.EmptyGymTeamException;
+import com.mi80.pokeweb.module.gym.application.exception.GymNotFoundException;
 import com.mi80.pokeweb.module.gym.core.entity.Gym;
-import com.mi80.pokeweb.module.pokemon.application.service.PokemonService;
+import com.mi80.pokeweb.module.gym.core.repository.GymRepository;
 import com.mi80.pokeweb.module.pokemon.core.entity.Pokemon;
-import com.mi80.pokeweb.module.gym.core.enums.GymLeader;
-import com.mi80.pokeweb.module.game.core.enums.Trainer;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.CopyOnWriteArrayList;
 
 @Service
 public class GymService {
 
-    private final List<Gym> gyms = new CopyOnWriteArrayList<>();
+    private final GymRepository gymRepository;
 
-    public GymService(PokemonService pokemonService) {
-        gyms.add(createGym(
-                "Pewter Gym", 1,
-                GymLeader.BROCK,null,
-                List.of(
-                        pokemonService.findByDex(74),
-                        pokemonService.findByDex(95)
-                )
-        ));
-        gyms.add(createGym(
-                "Cerulean Gym", 2,
-                GymLeader.MISTY,null,
-                List.of(
-                        pokemonService.findByDex(120),
-                        pokemonService.findByDex(121)
-                )
-        ));
-        gyms.add(createGym(
-                "Vermilion Gym", 3,
-                GymLeader.LT_SURGE,null,
-                List.of(
-                        pokemonService.findByDex(100),
-                        pokemonService.findByDex(26)
-                )
-        ));
-        gyms.add(createGym(
-                "Celadon Gym", 4,
-                GymLeader.ERIKA,null,
-                List.of(
-                        pokemonService.findByDex(114),
-                        pokemonService.findByDex(45)
-                )
-        ));
-        gyms.add(createGym(
-                "Fuchsia Gym", 5,
-                GymLeader.KOGA,null,
-                List.of(
-                        pokemonService.findByDex(109),
-                        pokemonService.findByDex(89)
-                )
-        ));
-        gyms.add(createGym(
-                "Saffron Gym", 6,
-                GymLeader.SABRINA,null,
-                List.of(
-                        pokemonService.findByDex(64),
-                        pokemonService.findByDex(65)
-                )
-        ));
-        gyms.add(createGym(
-                "Cinnabar Gym", 7,
-                GymLeader.BLAINE,null,
-                List.of(
-                        pokemonService.findByDex(58),
-                        pokemonService.findByDex(59)
-                )
-        ));
-        gyms.add(createGym(
-                "Viridian Gym", 8,
-                GymLeader.GIOVANNI,null,
-                List.of(
-                        pokemonService.findByDex(111),
-                        pokemonService.findByDex(34)
-                )
-        ));
+    public GymService(GymRepository gymRepository) {
+        this.gymRepository = gymRepository;
     }
 
     public List<Gym> listAll() {
-        return List.copyOf(gyms);
+        return gymRepository.listAll();
     }
 
     public Gym findById(UUID id) {
-        return gyms.stream()
-                .filter(gym -> gym.getId().equals(id))
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("Gym was not found"));
+        return gymRepository.findById(id).orElseThrow(
+                () -> new GymNotFoundException(
+                        "Gym was not found by ID: "+id
+                )
+        );
     }
 
     public Gym findByGymOrder(int order) {
-        if (order < 1 || order > 8) {
-            throw new RuntimeException("Gym was not found");
-        }
-
-        return gyms.stream()
-                .filter(gym -> gym.getGymOrder() == order)
-                .findFirst()
-                .orElseThrow(() -> new RuntimeException("Gym was not found"));
+        return gymRepository.findByGymOrder(order).orElseThrow(
+                () -> new GymNotFoundException(
+                        "Gym was not found by order: "+order
+                )
+        );
     }
 
     public List<Pokemon> findPokemon(UUID id) {
-        return List.copyOf(findById(id).getPokemon());
-    }
+        Gym gym = findById(id);
 
-    private static Gym createGym(
-            String name,
-            int gymOrder,
-            GymLeader leader,
-            Trainer challenger,
-            List<Pokemon> pokemon
-    ) {
-        return new Gym(
-                name,
-                gymOrder,
-                leader,
-                challenger,
-                pokemon
-        );
+        if (gym.getPokemon().isEmpty()) {
+            throw new EmptyGymTeamException(
+                    "Gym has no Pokémon assigned to it."
+            );
+        }
+
+        return gym.getPokemon();
     }
 }

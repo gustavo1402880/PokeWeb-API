@@ -3,17 +3,16 @@ package com.mi80.pokeweb.module.pokemon.infrastructure.persistence.impl;
 import com.mi80.pokeweb.module.pokemon.core.entity.Pokemon;
 import com.mi80.pokeweb.module.pokemon.core.repository.PokemonRepository;
 import com.mi80.pokeweb.module.pokemon.infrastructure.persistence.jpa.IJpaPokemonRepository;
+import lombok.RequiredArgsConstructor;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+@RequiredArgsConstructor
 public class PokemonRepositoryImpl implements PokemonRepository {
-    private final IJpaPokemonRepository jpaPokemonRepository;
 
-    public PokemonRepositoryImpl(IJpaPokemonRepository jpaPokemonRepository) {
-        this.jpaPokemonRepository = jpaPokemonRepository;
-    }
+    private final IJpaPokemonRepository jpaPokemonRepository;
 
     @Override
     public List<Pokemon> findAll() {
