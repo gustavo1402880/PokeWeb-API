@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -48,7 +49,6 @@ public class Gym {
     @Enumerated(value = EnumType.STRING)
     private GymLeader leader;
 
-    @Column(nullable = true)
     @Enumerated(value = EnumType.STRING)
     private Trainer challenger;
 
@@ -56,11 +56,17 @@ public class Gym {
     @Enumerated(value = EnumType.STRING)
     private PokemonType type = leader.getSpeciality();
 
+    @Builder.Default
+    @Column(name = "gym_pokemon_team")
     @OneToMany(fetch = FetchType.LAZY)
+    @OrderColumn(name = "slot_position")
     @JoinColumn(
             name = "gym_id",
             nullable = false,
-            foreignKey = @ForeignKey(name = "fk_gym_pokemon")
+            foreignKey = @ForeignKey(
+                    name = "fk_gym_pokemon"
+            )
     )
-    private List<Pokemon> pokemon;
+    private List<Pokemon> pokemon =
+            new ArrayList<>();
 }

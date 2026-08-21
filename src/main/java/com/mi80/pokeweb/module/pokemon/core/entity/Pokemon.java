@@ -56,8 +56,9 @@ public class Pokemon {
     @Column(name = "max_health", nullable = false)
     private int maxHealth;
 
+    @Builder.Default
     @Column(name = "current_health", nullable = false)
-    private int currentHealth;
+    private int currentHealth = maxHealth;
 
     @Column(nullable = false)
     private int attack;

@@ -5,12 +5,10 @@ import com.mi80.pokeweb.module.game.core.enums.ItemType;
 import com.mi80.pokeweb.module.game.core.enums.Trainer;
 import com.mi80.pokeweb.module.pokemon.core.entity.Pokemon;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.persistence.*;
+import lombok.*;
 
-import java.util.EnumMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.*;
 
 /**
  * Game entity
@@ -20,6 +18,13 @@ import java.util.concurrent.CopyOnWriteArrayList;
  * @author gustavo_pelissari150
  * @version 1.0.0
  */
+@Entity
+@Table(name = "games")
+@Getter
+@Setter
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 @Tag(
         name = "Game entity",
         description = """
@@ -28,73 +33,62 @@ import java.util.concurrent.CopyOnWriteArrayList;
                 """
 )
 public class Game {
+    @Id
+    @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
-    private Trainer trainer;
+
+    @Builder.Default
+    @Column(nullable = false)
+    @Enumerated(value = EnumType.STRING)
+    private Trainer trainer = Trainer.ASH;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(
+            name = "current_gym_id",
+            foreignKey = @ForeignKey(
+                    name = "fk_game_gym"
+            )
+    )
     private Gym currentGym;
-    private int coins;
-    private List<Pokemon> team;
-    private Map<ItemType, Integer> inventory;
 
-    public Game() {}
+    @Builder.Default
+    @Column(nullable = false)
+    private int coins = 1000;
 
-    public Game(Trainer trainer, Gym currentGym, int coins) {
-        this.id = UUID.randomUUID();
-        this.trainer = trainer;
-        this.currentGym = currentGym;
-        this.coins = coins;
-        this.team = new CopyOnWriteArrayList<>();
-        this.inventory = new EnumMap<>(ItemType.class);
+    @Builder.Default
+    @Column(name = "pokemon_team")
+    @OneToMany(
+            fetch = FetchType.LAZY,
+            cascade = {
+                    CascadeType.PERSIST,
+                    CascadeType.MERGE
+            }
+    )
+    @OrderColumn(name = "slot_position")
+    @JoinColumn(
+            name = "game_id",
+            nullable = false,
+            foreignKey = @ForeignKey(
+                    name = "fk_game_pokemon"
+            )
+    )
+    private List<Pokemon> team =
+            new ArrayList<>();
 
-        for (ItemType item : ItemType.values()) {
-            inventory.put(item, 0);
-        }
-    }
-
-    public UUID getId() {
-        return id;
-    }
-
-    public void setId(UUID id) {
-        this.id = id;
-    }
-
-    public Trainer getTrainer() {
-        return trainer;
-    }
-
-    public void setTrainer(Trainer trainer) {
-        this.trainer = trainer;
-    }
-
-    public Gym getCurrentGym() {
-        return currentGym;
-    }
-
-    public void setCurrentGym(Gym currentGym) {
-        this.currentGym = currentGym;
-    }
-
-    public int getCoins() {
-        return coins;
-    }
-
-    public void setCoins(int coins) {
-        this.coins = Math.max(0, coins);
-    }
-
-    public List<Pokemon> getTeam() {
-        return team;
-    }
-
-    public void setTeam(List<Pokemon> team) {
-        this.team = team;
-    }
-
-    public Map<ItemType, Integer> getInventory() {
-        return inventory;
-    }
-
-    public void setInventory(Map<ItemType, Integer> inventory) {
-        this.inventory = inventory;
-    }
+    @Builder.Default
+    @ElementCollection
+    @CollectionTable(
+            name = "game_inventory",
+            joinColumns = @JoinColumn(
+                    name = "game_id",
+                    foreignKey = @ForeignKey(
+                            name = "fk_inventory_game"
+                    )
+            )
+    )
+    @MapKeyColumn(name = "item_type")
+    @MapKeyEnumerated(EnumType.STRING)
+    @Column(name = "item_count")
+    private Map<ItemType, Integer> inventory =
+            new EnumMap<>(ItemType.class);
 }

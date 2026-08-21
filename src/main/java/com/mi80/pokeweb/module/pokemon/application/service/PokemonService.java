@@ -45,16 +45,9 @@ public class PokemonService {
     }
 
     public AttackResult attack(
-            UUID attackerId,
-            UUID defenderId
+            Pokemon attacker,
+            Pokemon defender
     ) {
-        if (attackerId.equals(defenderId)) {
-            throw new SamePokemonException("A Pokémon cannot attack itself");
-        }
-
-        Pokemon attacker = findById(attackerId);
-        Pokemon defender = findById(defenderId);
-
         if (attacker.isFainted()) {
             throw new FaintedPokemonException("A Fainted Pokémon cannot attack");
         }
@@ -62,8 +55,6 @@ public class PokemonService {
         int damage = calculateDamage(attacker, defender);
 
         defender.takeDamage(damage);
-
-        defender = repository.save(defender);
 
         return new AttackResult(
                 attacker.getId(),
@@ -77,12 +68,9 @@ public class PokemonService {
     }
 
     public boolean dodge(
-            UUID defenderId,
-            UUID attackerId
+            Pokemon defender,
+            Pokemon attacker
     ) {
-        Pokemon defender = findById(defenderId);
-        Pokemon attacker = findById(attackerId);
-
         if (defender.isFainted()) {
             throw  new FaintedPokemonException("A Fainted Pokémon cannot dodge");
         }
@@ -94,12 +82,9 @@ public class PokemonService {
     }
 
     public boolean flee(
-            UUID pokemonId,
-            UUID opponentId
+            Pokemon pokemon,
+            Pokemon opponent
     ) {
-        Pokemon pokemon = findById(pokemonId);
-        Pokemon opponent = findById(opponentId);
-
         if (pokemon.isFainted()) {
             throw  new FaintedPokemonException("A Fainted Pokémon cannot flee");
         }
@@ -111,21 +96,17 @@ public class PokemonService {
     }
 
     public Pokemon levelUp(
-            UUID pokemonId
+            Pokemon pokemon
     ) {
-        Pokemon pokemon = findById(pokemonId);
         pokemon.levelUp();
 
-        repository.save(pokemon);
-
-        return repository.save(pokemon);
+        return pokemon;
     }
 
     public Pokemon evolve(
-           UUID pokemonId,
+           Pokemon pokemon,
            Pokemon pokemonEvolved
     ) {
-        Pokemon pokemon = findById(pokemonId);
         BattlePosition battlePosition = pokemon.getBattlePosition();
 
         switch (pokemon.getEvolutionStage()) {
@@ -148,35 +129,32 @@ public class PokemonService {
             case STAGE_2 -> throw new MaxEvolutionStageException("Pokémon is already on max evolution stage");
         }
 
-        return repository.save(pokemon);
+        return pokemon;
     }
 
     public Pokemon movePosition(
-            UUID pokemonId
+            Pokemon pokemon
     ) {
-        Pokemon pokemon = findById(pokemonId);
         pokemon.movePosition();
 
-        return repository.save(pokemon);
+        return pokemon;
     }
 
     public Pokemon heal(
-            UUID pokemonId,
+            Pokemon pokemon,
             int amount
     ) {
-        Pokemon pokemon = findById(pokemonId);
         pokemon.heal(amount);
 
-        return repository.save(pokemon);
+        return pokemon;
     }
 
     public Pokemon fullHeal(
-            UUID pokemonId
+            Pokemon pokemon
     ) {
-        Pokemon pokemon = findById(pokemonId);
         pokemon.fullHeal();
 
-        return repository.save(pokemon);
+        return pokemon;
     }
 
     private static int calculateDamage(Pokemon attacker, Pokemon defender) {
