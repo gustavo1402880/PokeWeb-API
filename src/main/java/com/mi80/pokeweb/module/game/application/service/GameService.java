@@ -1,7 +1,6 @@
 package com.mi80.pokeweb.module.game.application.service;
 
-import com.mi80.pokeweb.module.game.application.exception.EmptyPokemonTeamException;
-import com.mi80.pokeweb.module.game.application.exception.GameNotFoundException;
+import com.mi80.pokeweb.module.game.application.exception.*;
 import com.mi80.pokeweb.module.game.application.service.result.AttackResult;
 import com.mi80.pokeweb.module.game.application.service.result.BattleResult;
 import com.mi80.pokeweb.module.game.application.service.result.BattleTurn;
@@ -16,7 +15,7 @@ import com.mi80.pokeweb.module.gym.application.service.GymService;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
-import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.stream.Collectors;
 
 @Service
 public class GameService {
@@ -104,12 +103,12 @@ public class GameService {
 
     public Game moveToGym(UUID id) {
         Game game = findGameById(id);
+
         int nextGymOrder =
                 game.getCurrentGym()
                         .getGymOrder() + 1;
 
         Gym nextGym = gymService.findByGymOrder(nextGymOrder);
-        nextGym.setChallenger(game.getTrainer());
 
         game.setCurrentGym(nextGym);
 
@@ -126,7 +125,7 @@ public class GameService {
 
 
         if (game.getTeam().size() >= MAX_TEAM_SIZE) {
-            throw new RuntimeException("Team already has the maximum number of Pokémon");
+            throw new TeamMaxSizeException("Team already has the maximum number of Pokémon");
         }
 
         boolean hasFled = pokemonService.flee(
@@ -135,15 +134,14 @@ public class GameService {
         );
 
         if (hasFled) {
-            throw new RuntimeException("Wild Pokémon fled the battle");
+            throw new WildPokemonFledException("Wild Pokémon fled the battle");
         }
 
-        pokemon.movePosition();
+        pokemonService.movePosition(pokemon);
+
         game.getTeam().add(pokemon);
 
-        game = repository.save(game);
-
-        return game;
+        return repository.save(game);
     }
 
     public Game buyItem(UUID id, ItemType item) {
@@ -151,7 +149,7 @@ public class GameService {
         int price = item.getPrice();
 
         if (game.getCoins() < price) {
-            throw new RuntimeException("Insufficient coins. Required: "+price+
+            throw new InsufficientCoinsException("Insufficient coins. Required: "+price+
                     ", Available: "+game.getCoins());
         }
 
@@ -166,14 +164,18 @@ public class GameService {
 
     public Pokemon useItem(UUID id, UUID pokemonId, ItemType item) {
         Game game = findGameById(id);
-        requirePokemonInTeam(game, pokemonId);
+
+        Pokemon pokemon = requirePokemonInTeam(game, pokemonId);
 
         int quantity = game.getInventory().getOrDefault(item, 0);
         if (quantity <= 0) {
             throw new RuntimeException("Item does not exists in the inventory");
         }
 
-        Pokemon healedPokemon = pokemonService.heal(pokemonId, item.getHealingAmount());
+        Pokemon healedPokemon = pokemonService.heal(
+                pokemon,
+                item.getHealingAmount()
+        );
 
         game.getInventory().put(item, quantity - 1);
         savePokemonStatus(game, healedPokemon);
@@ -183,9 +185,13 @@ public class GameService {
 
     public Pokemon heal(UUID id, UUID pokemonId) {
         Game game = findGameById(id);
-        requirePokemonInTeam(game, pokemonId);
 
-        return pokemonService.fullHeal(pokemonId);
+        Pokemon pokemon = requirePokemonInTeam(
+                game,
+                pokemonId
+        );
+
+        return pokemonService.fullHeal(pokemon);
     }
 
     public BattleResult battle(Pokemon firstPokemon, Pokemon secondPokemon) {
@@ -226,13 +232,13 @@ public class GameService {
         ) {
             turns++;
 
-            boolean dogded =
+            boolean dodged =
                     pokemonService.dodge(
                             defender,
                             attacker
                     );
 
-            if (dogded) {
+            if (dodged) {
 
                 battleHistory.add(
                         new BattleTurn(
@@ -299,89 +305,106 @@ public class GameService {
             UUID firstPokemonId,
             UUID secondPokemonId
     ) {
+        Game game = findGameById(id);
 
+        Pokemon pokemon =
+                requirePokemonInTeam(game, firstPokemonId);
+
+        Pokemon opponent =
+                pokemonService.findById(secondPokemonId);
+
+        BattleResult battleResult = battle(
+                pokemon,
+                opponent
+        );
+
+        if (!pokemon.isFainted()) {
+            pokemon.levelUp();
+        }
+
+        repository.save(game);
+
+        return battleResult;
     }
 
     public List<BattleResult> challengeGymLeader(UUID id) {
         Game game = findGameById(id);
+
         List<BattleResult> battleResults = new ArrayList<>();
 
         List<Pokemon> trainerTeam = game.getTeam();
 
         Gym gym = game.getCurrentGym();
-        List<Pokemon> gymTeam = gym.getPokemon();
+
+        List<Pokemon> gymTeam =
+                createGymBattleTeam(gym);
 
         while (
-                hasAvailablePokemon(trainerTeam) &&
-                        hasAvailablePokemon(gymTeam)) {
-            Pokemon trainerPokemon = getNextAvailablePokemon(trainerTeam);
-            Pokemon gymPokemon = getNextAvailablePokemon(gymTeam);
+                hasAvailablePokemon(trainerTeam)
+                        && hasAvailablePokemon(gymTeam)
+        ) {
+            Pokemon trainerPokemon =
+                    getNextAvailablePokemon(trainerTeam);
 
-            Pokemon attacker;
-            Pokemon defender;
+            Pokemon gymPokemon =
+                    getNextAvailablePokemon(gymTeam);
 
-            if (gymPokemon.getSpeed() > trainerPokemon.getSpeed()) {
-                attacker = gymPokemon;
-                defender = trainerPokemon;
-            } else {
-                attacker = trainerPokemon;
-                defender = gymPokemon;
-            }
+            BattleResult battleResult =
+                    battle(trainerPokemon,
+                            gymPokemon);
 
-            List<BattleTurn> battleHistory = new ArrayList<>();
-            int turns = 0;
-
-            while (!trainerPokemon.isFainted()
-                    && !gymPokemon.isFainted()
-                    && turns < MAX_BATTLE_TURNS) {
-
-                turns++;
-
-                AttackResult attack = pokemonService.attack(
-                        attacker.getId(),
-                        defender.getId()
-                );
-
-                battleHistory.add(new BattleTurn(
-                        turns,
-                        attack.attackerNickname(),
-                        attack.defenderNickname(),
-                        attack.damage(),
-                        attack.defenderRemainingHealth(),
-                        attack.defenderFainted())
-                );
-
-                if (defender.isFainted()) {
-                    break;
-                }
-
-                Pokemon previousAttacker = attacker;
-                attacker = defender;
-                defender = previousAttacker;
-            }
-
-            Pokemon winner;
-            Pokemon loser;
-
-            if (trainerPokemon.isFainted()) {
-                winner = gymPokemon;
-                loser = trainerPokemon;
-            } else if (gymPokemon.isFainted()) {
-                winner = trainerPokemon;
-                loser = gymPokemon;
-            } else {
-                throw new RuntimeException("The battle has reached the maximum turn limit");
-            }
-
-            battleResults.add( new BattleResult(
-                    winner.getName(),
-                    loser.getName(),
-                    turns,
-                    List.copyOf(battleHistory)
-            ));
+            battleResults.add(
+                    battleResult
+            );
         }
 
-        return battleResults;
+        repository.save(game);
+
+        return List.copyOf(battleResults);
+    }
+
+    public Pokemon levelUp(UUID id, UUID pokemonId) {
+        Game game = findGameById(id);
+
+        Pokemon pokemon =
+                requirePokemonInTeam(game, pokemonId);
+
+        pokemonService.levelUp(pokemon);
+
+        repository.save(game);
+
+        return pokemon;
+    }
+
+    public Pokemon evolve(
+            UUID id,
+            UUID pokemonId,
+            Pokemon pokemonEvolved
+    ) {
+        Game game = findGameById(id);
+
+        Pokemon pokemon =
+                requirePokemonInTeam(game, pokemonId);
+
+        pokemonService.evolve(
+                pokemon,
+                pokemonEvolved
+        );
+
+        repository.save(game);
+
+        return pokemon;
+    }
+
+    private List<Pokemon> createGymBattleTeam(
+        Gym gym
+    ) {
+        return gym.getPokemon()
+                .stream()
+                .map(pokemon -> pokemonService.findById(
+                        pokemon.getId()
+                ))
+                .collect(Collectors.toList());
     }
 
     private Pokemon getNextAvailablePokemon(List<Pokemon> team) {

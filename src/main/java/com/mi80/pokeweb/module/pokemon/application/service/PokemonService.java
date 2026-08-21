@@ -107,24 +107,28 @@ public class PokemonService {
            Pokemon pokemon,
            Pokemon pokemonEvolved
     ) {
-        BattlePosition battlePosition = pokemon.getBattlePosition();
-
         switch (pokemon.getEvolutionStage()) {
             case BASIC -> {
                 if (pokemon.getLevel() < 16) {
                     throw new BelowRequiredLevelException("16 level is required to evolve a BASIC Pokémon");
                 }
-                pokemon = pokemonEvolved;
-                pokemon.setEvolutionStage(EvolutionStage.STAGE_1);
-                pokemon.setBattlePosition(battlePosition);
+                applyEvolution(
+                        pokemon,
+                        pokemonEvolved,
+                        EvolutionStage.STAGE_1,
+                        pokemon.getBattlePosition()
+                );
             }
             case STAGE_1 -> {
                 if (pokemon.getLevel() < 36) {
                     throw  new BelowRequiredLevelException("36 level is required to evolve a STAGE_1 Pokémon");
                 }
-                pokemon = pokemonEvolved;
-                pokemon.setEvolutionStage(EvolutionStage.STAGE_2);
-                pokemon.setBattlePosition(battlePosition);
+                applyEvolution(
+                        pokemon,
+                        pokemonEvolved,
+                        EvolutionStage.STAGE_2,
+                        pokemon.getBattlePosition()
+                );
             }
             case STAGE_2 -> throw new MaxEvolutionStageException("Pokémon is already on max evolution stage");
         }
@@ -161,5 +165,60 @@ public class PokemonService {
         int rawDamage =
                 attacker.getAttack() - (defender.getDefense() / 2);
         return Math.max(1, rawDamage);
+    }
+
+    private void applyEvolution(
+            Pokemon pokemon,
+            Pokemon evolved,
+            EvolutionStage newStage,
+            BattlePosition battlePosition
+    ) {
+        pokemon.setNumberDex(
+                evolved.getNumberDex()
+        );
+
+        pokemon.setName(
+                evolved.getName()
+        );
+
+        pokemon.setPrimaryType(
+                evolved.getPrimaryType()
+        );
+
+        pokemon.setSecondaryType(
+                evolved.getSecondaryType()
+        );
+
+        pokemon.setMaxHealth(
+                evolved.getMaxHealth()
+        );
+
+        pokemon.setCurrentHealth(
+                evolved.getMaxHealth()
+        );
+
+        pokemon.setAttack(
+                evolved.getAttack()
+        );
+
+        pokemon.setDefense(
+                evolved.getDefense()
+        );
+
+        pokemon.setSpeed(
+                evolved.getSpeed()
+        );
+
+        pokemon.setClassification(
+                evolved.getClassification()
+        );
+
+        pokemon.setEvolutionStage(
+                newStage
+        );
+
+        pokemon.setBattlePosition(
+                battlePosition
+        );
     }
 }
